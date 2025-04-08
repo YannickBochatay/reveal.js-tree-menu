@@ -147,26 +147,6 @@ const Plugin = () => {
       reenableMouseSelection();
     }
   }
-
-  function scrollItemToTop(el) {
-    disableMouseSelection();
-    el.offsetParent.scrollTop = el.offsetTop;
-    reenableMouseSelection();
-  }
-
-  function scrollItemToBottom(el) {
-    disableMouseSelection();
-    el.offsetParent.scrollTop =
-      el.offsetTop - el.offsetParent.offsetHeight + el.offsetHeight;
-    reenableMouseSelection();
-  }
-
-  function selectItem(el) {
-    el.classList.add('selected');
-    keepVisible(el);
-    if (options.sticky && options.autoOpen) openItem(el);
-  }
-
   //
   // Utilty functions
   //
@@ -258,34 +238,6 @@ const Plugin = () => {
     );
     select('div[data-panel="' + panel + '"]').classList.add(
       'active-menu-panel'
-    );
-  }
-
-  function nextPanel() {
-    var next =
-      (parseInt(select('.active-toolbar-button').getAttribute('data-button')) +
-        1) %
-      buttons;
-    openPanel(
-      null,
-      select('.toolbar-panel-button[data-button="' + next + '"]').getAttribute(
-        'data-panel'
-      )
-    );
-  }
-
-  function prevPanel() {
-    var next =
-      parseInt(select('.active-toolbar-button').getAttribute('data-button')) -
-      1;
-    if (next < 0) {
-      next = buttons - 1;
-    }
-    openPanel(
-      null,
-      select('.toolbar-panel-button[data-button="' + next + '"]').getAttribute(
-        'data-panel'
-      )
     );
   }
 
@@ -619,60 +571,6 @@ const Plugin = () => {
       deck.addEventListener('slidechanged', highlightCurrentSlide);
 
       //
-      // Themes
-      //
-      if (options.themes) {
-        var panel = create('div', {
-          class: 'slide-menu-panel',
-          'data-panel': 'Themes'
-        });
-        panels.appendChild(panel);
-        var menu = create('ul', { class: 'slide-menu-items' });
-        panel.appendChild(menu);
-        options.themes.forEach(function (t, i) {
-          var attrs = {
-            class: 'slide-menu-item',
-            'data-item': '' + (i + 1)
-          };
-          if (t.theme) {
-            attrs['data-theme'] = t.theme;
-          }
-          if (t.highlightTheme) {
-            attrs['data-highlight-theme'] = t.highlightTheme;
-          }
-          var item = create('li', attrs, t.name);
-          menu.appendChild(item);
-          item.onclick = clicked;
-        });
-      }
-
-      //
-      // Transitions
-      //
-      if (options.transitions) {
-        var panel = create('div', {
-          class: 'slide-menu-panel',
-          'data-panel': 'Transitions'
-        });
-        panels.appendChild(panel);
-        var menu = create('ul', { class: 'slide-menu-items' });
-        panel.appendChild(menu);
-        options.transitions.forEach(function (name, i) {
-          var item = create(
-            'li',
-            {
-              class: 'slide-menu-item',
-              'data-transition': name.toLowerCase(),
-              'data-item': '' + (i + 1)
-            },
-            name
-          );
-          menu.appendChild(item);
-          item.onclick = clicked;
-        });
-      }
-
-      //
       // Open menu options
       //
       if (options.openButton) {
@@ -747,19 +645,11 @@ const Plugin = () => {
   }
 
   // modified from math plugin
-  function loadResource(url, type, callback) {
+  function loadCSSResource(url, callback) {
     var head = document.querySelector('head');
-    var resource;
-
-    if (type === 'script') {
-      resource = document.createElement('script');
-      resource.type = 'text/javascript';
-      resource.src = url;
-    } else if (type === 'stylesheet') {
-      resource = document.createElement('link');
-      resource.rel = 'stylesheet';
-      resource.href = url;
-    }
+    var resource = document.createElement('link');
+    resource.rel = 'stylesheet';
+    resource.href = url;
 
     // Wrapper for callback to make sure it only fires once
     var finish = function () {
@@ -806,7 +696,7 @@ const Plugin = () => {
       deck = reveal;
       config = deck.getConfig();
       initOptions(config);
-      loadResource(options.path + 'menu.css', 'stylesheet', loadPlugin);
+      loadCSSResource(options.path + 'menu.css', loadPlugin);
     },
 
     toggle: toggleMenu,
