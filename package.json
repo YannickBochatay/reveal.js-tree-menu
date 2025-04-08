@@ -21,6 +21,6 @@
   },
   "homepage": "https://github.com/denehyg/reveal.js-menu#readme",
   "devDependencies": {
-    
+    "reveal.js": "^5.2.1"
   }
 }
