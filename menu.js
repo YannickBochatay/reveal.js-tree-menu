@@ -292,20 +292,10 @@ const Plugin = () => {
   function openItem(item, force) {
     var h = parseInt(item.getAttribute('data-slide-h'));
     var v = parseInt(item.getAttribute('data-slide-v'));
-    var theme = item.getAttribute('data-theme');
-    var highlightTheme = item.getAttribute('data-highlight-theme');
     var transition = item.getAttribute('data-transition');
 
     if (!isNaN(h) && !isNaN(v)) {
       deck.slide(h, v);
-    }
-
-    if (theme) {
-      changeStylesheet('theme', theme);
-    }
-
-    if (highlightTheme) {
-      changeStylesheet('highlight-theme', highlightTheme);
     }
 
     if (transition) {
@@ -816,22 +806,6 @@ const Plugin = () => {
     }
     if (content) el.innerHTML = content;
     return el;
-  }
-
-  function changeStylesheet(id, href) {
-    // take note of the previous theme and remove it, then create a new stylesheet reference and insert it
-    // this is required to force a load event so we can change the menu style to match the new style
-    var stylesheet = select('link#' + id);
-    var parent = stylesheet.parentElement;
-    var sibling = stylesheet.nextElementSibling;
-    stylesheet.remove();
-
-    var newStylesheet = stylesheet.cloneNode();
-    newStylesheet.setAttribute('href', href);
-    newStylesheet.onload = function () {
-      matchRevealStyle();
-    };
-    parent.insertBefore(newStylesheet, sibling);
   }
 
   // modified from math plugin
