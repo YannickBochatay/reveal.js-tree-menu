@@ -619,68 +619,6 @@ const Plugin = () => {
       deck.addEventListener('slidechanged', highlightCurrentSlide);
 
       //
-      // Custom menu panels
-      //
-      if (options.custom) {
-        function xhrSuccess() {
-          if (this.status >= 200 && this.status < 300) {
-            this.panel.innerHTML = this.responseText;
-            enableCustomLinks(this.panel);
-          } else {
-            showErrorMsg(this);
-          }
-        }
-        function xhrError() {
-          showErrorMsg(this);
-        }
-        function loadCustomPanelContent(panel, sURL) {
-          var oReq = new XMLHttpRequest();
-          oReq.panel = panel;
-          oReq.arguments = Array.prototype.slice.call(arguments, 2);
-          oReq.onload = xhrSuccess;
-          oReq.onerror = xhrError;
-          oReq.open('get', sURL, true);
-          oReq.send(null);
-        }
-        function enableCustomLinks(panel) {
-          selectAll('ul.slide-menu-items li.slide-menu-item', panel).forEach(
-            function (item, i) {
-              item.setAttribute('data-item', i + 1);
-              item.onclick = clicked;
-              item.addEventListener('mouseenter', handleMouseHighlight);
-            }
-          );
-        }
-
-        function showErrorMsg(response) {
-          var msg =
-            '<p>ERROR: The attempt to fetch ' +
-            response.responseURL +
-            ' failed with HTTP status ' +
-            response.status +
-            ' (' +
-            response.statusText +
-            ').</p>' +
-            '<p>Remember that you need to serve the presentation HTML from a HTTP server.</p>';
-          response.panel.innerHTML = msg;
-        }
-
-        options.custom.forEach(function (element, index, array) {
-          var panel = create('div', {
-            'data-panel': 'Custom' + index,
-            class: 'slide-menu-panel slide-menu-custom-panel'
-          });
-          if (element.content) {
-            panel.innerHTML = element.content;
-            enableCustomLinks(panel);
-          } else if (element.src) {
-            loadCustomPanelContent(panel, element.src);
-          }
-          panels.appendChild(panel);
-        });
-      }
-
-      //
       // Themes
       //
       if (options.themes) {
