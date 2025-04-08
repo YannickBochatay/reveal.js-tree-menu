@@ -12,20 +12,7 @@ const Plugin = () => {
   var initialised = false;
 
   function scriptPath() {
-    // obtain plugin path from the script element
-    var path;
-
-    const script = document.querySelector('script[src$="menu.js"]');
-    if (script) {
-      var sel = document.querySelector('script[src$="menu.js"]');
-      if (sel) {
-        path = sel.src.slice(0, -7);
-      }
-    } else {
-      path = import.meta.url.slice(0, import.meta.url.lastIndexOf('/') + 1);
-    }
-
-    return path;
+    return import.meta.url.slice(0, import.meta.url.lastIndexOf('/') + 1);
   }
 
   function initOptions(config) {
