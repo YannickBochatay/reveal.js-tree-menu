@@ -96,7 +96,7 @@ const Plugin = () => {
       );
       options.transitions = false;
     }
-
+    
     if (typeof options.openButton === 'undefined') options.openButton = true;
 
     if (typeof options.openSlideNumber === 'undefined')
@@ -681,7 +681,7 @@ const Plugin = () => {
         id: 'close',
         class: 'toolbar-panel-button'
       });
-      button.appendChild(create('i', { class: 'fas fa-times' }, "fa-times"));
+      button.appendChild(create('i', { class: 'fas fa-times' }));
       button.appendChild(create('br'));
       button.appendChild(
         create('span', { class: 'slide-menu-toolbar-label' }, 'Close')
@@ -745,15 +745,15 @@ const Plugin = () => {
 
         if (options.markers) {
           item.appendChild(
-            create('i', { class: 'fas fa-check-circle fa-fw past' }, "fa-check-circle")
+            create('i', { class: 'fas fa-check-circle fa-fw past' })
           );
           item.appendChild(
             create('i', {
-              class: 'fas fa-arrow-alt-circle-right fa-fw active',
-            }, "fa-arrow")
+              class: 'fas fa-arrow-alt-circle-right fa-fw active'
+            })
           );
           item.appendChild(
-            create('i', { class: 'far fa-circle fa-fw future' }, "fa-circle")
+            create('i', { class: 'far fa-circle fa-fw future' })
           );
         }
 
@@ -981,7 +981,7 @@ const Plugin = () => {
         // add menu button
         var div = create('div', { class: 'slide-menu-button' });
         var link = create('a', { href: '#' });
-        link.appendChild(create('i', {}, "☰"));
+        link.appendChild(create('span', null, "☰"));
         div.appendChild(link);
         select('.reveal').appendChild(div);
         div.onclick = openMenu;
@@ -1173,14 +1173,21 @@ const Plugin = () => {
   }
 
   function loadPlugin() {
+    // does not support IE8 or below
+    var supported = true;
+
     // do not load the menu in the upcoming slide panel in the speaker notes
     if (
       deck.isSpeakerNotes() &&
       window.location.search.endsWith('controls=false')
-    )
+    ) {
+      supported = false;
+    }
 
-    if (!options.delayInit) initMenu();
-    dispatchEvent('menu-ready');
+    if (supported) {
+      if (!options.delayInit) initMenu();
+      dispatchEvent('menu-ready');
+    }
   }
 
   return {
