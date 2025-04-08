@@ -681,7 +681,7 @@ const Plugin = () => {
         id: 'close',
         class: 'toolbar-panel-button'
       });
-      button.appendChild(create('i', { class: 'fas fa-times' }));
+      button.appendChild(create('i', { class: 'fas fa-times' }, "fa-times"));
       button.appendChild(create('br'));
       button.appendChild(
         create('span', { class: 'slide-menu-toolbar-label' }, 'Close')
@@ -745,15 +745,15 @@ const Plugin = () => {
 
         if (options.markers) {
           item.appendChild(
-            create('i', { class: 'fas fa-check-circle fa-fw past' })
+            create('i', { class: 'fas fa-check-circle fa-fw past' }, "fa-check-circle")
           );
           item.appendChild(
             create('i', {
-              class: 'fas fa-arrow-alt-circle-right fa-fw active'
-            })
+              class: 'fas fa-arrow-alt-circle-right fa-fw active',
+            }, "fa-arrow")
           );
           item.appendChild(
-            create('i', { class: 'far fa-circle fa-fw future' })
+            create('i', { class: 'far fa-circle fa-fw future' }, "fa-circle")
           );
         }
 
@@ -981,7 +981,7 @@ const Plugin = () => {
         // add menu button
         var div = create('div', { class: 'slide-menu-button' });
         var link = create('a', { href: '#' });
-        link.appendChild(create('i', { class: 'fas fa-bars' }));
+        link.appendChild(create('i', {}, "☰"));
         div.appendChild(link);
         select('.reveal').appendChild(div);
         div.onclick = openMenu;
@@ -1189,17 +1189,7 @@ const Plugin = () => {
       deck = reveal;
       config = deck.getConfig();
       initOptions(config);
-      loadResource(options.path + 'menu.css', 'stylesheet', function () {
-        if (options.loadIcons === undefined || options.loadIcons) {
-          loadResource(
-            options.path + 'font-awesome/css/all.css',
-            'stylesheet',
-            loadPlugin
-          );
-        } else {
-          loadPlugin();
-        }
-      });
+      loadResource(options.path + 'menu.css', 'stylesheet', loadPlugin);
     },
 
     toggle: toggleMenu,
