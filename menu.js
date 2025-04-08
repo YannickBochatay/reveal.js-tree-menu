@@ -645,31 +645,17 @@ const Plugin = () => {
   }
 
   // modified from math plugin
-  function loadCSSResource(url, callback) {
-    var head = document.querySelector('head');
-    var resource = document.createElement('link');
-    resource.rel = 'stylesheet';
-    resource.href = url;
-
-    // Wrapper for callback to make sure it only fires once
-    var finish = function () {
-      if (typeof callback === 'function') {
-        callback.call();
-        callback = null;
-      }
-    };
-
-    resource.onload = finish;
-
-    // IE
-    resource.onreadystatechange = function () {
-      if (this.readyState === 'loaded') {
-        finish();
-      }
-    };
-
-    // Normal browsers
-    head.appendChild(resource);
+  function loadCSSResource(url) {
+    return new Promise((resolve, reject) => {
+      var head = document.querySelector('head');
+      var resource = document.createElement('link');
+      resource.rel = 'stylesheet';
+      resource.href = url;
+      resource.onload = resolve;
+      resource.onerror = reject;
+  
+      head.appendChild(resource);
+    })
   }
 
   function loadPlugin() {
@@ -692,11 +678,12 @@ const Plugin = () => {
 
   return {
     id: 'menu',
-    init: reveal => {
+    init: async reveal => {
       deck = reveal;
       config = deck.getConfig();
       initOptions(config);
-      loadCSSResource(options.path + 'menu.css', loadPlugin);
+      await loadCSSResource(options.path + 'menu.css');
+      loadPlugin();
     },
 
     toggle: toggleMenu,
