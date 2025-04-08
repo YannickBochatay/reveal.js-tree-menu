@@ -799,18 +799,12 @@ const Plugin = () => {
     document.querySelector('.reveal').dispatchEvent(event);
   }
 
-  function select(selector, el) {
-    if (!el) {
-      el = document;
-    }
+  function select(selector, el = document) {
     return el.querySelector(selector);
   }
 
-  function selectAll(selector, el) {
-    if (!el) {
-      el = document;
-    }
-    return Array.prototype.slice.call(el.querySelectorAll(selector));
+  function selectAll(selector, el = document) {
+    return el.querySelectorAll(selector);
   }
 
   function create(tagName, attrs, content) {
