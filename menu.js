@@ -5,16 +5,7 @@
  */
 
 const Plugin = () => {
-  const ieVersion = (function () {
-    let browser = /(msie) ([\w.]+)/.exec(
-      window.navigator.userAgent.toLowerCase()
-    );
-    if (browser && browser[1] === 'msie') {
-      return parseFloat(browser[2]);
-    }
-    return null;
-  })();
-
+  
   var deck;
   var config;
   var options;
@@ -103,10 +94,6 @@ const Plugin = () => {
       console.error(
         "reveal.js-menu error: transitions config value must be 'true' or an array of strings, eg ['None', 'Fade', 'Slide')"
       );
-      options.transitions = false;
-    }
-    if (ieVersion && ieVersion <= 9) {
-      // transitions aren't support in IE9 anyway, so no point in showing them
       options.transitions = false;
     }
 
@@ -1186,21 +1173,14 @@ const Plugin = () => {
   }
 
   function loadPlugin() {
-    // does not support IE8 or below
-    var supported = !ieVersion || ieVersion >= 9;
-
     // do not load the menu in the upcoming slide panel in the speaker notes
     if (
       deck.isSpeakerNotes() &&
       window.location.search.endsWith('controls=false')
-    ) {
-      supported = false;
-    }
+    )
 
-    if (supported) {
-      if (!options.delayInit) initMenu();
-      dispatchEvent('menu-ready');
-    }
+    if (!options.delayInit) initMenu();
+    dispatchEvent('menu-ready');
   }
 
   return {
