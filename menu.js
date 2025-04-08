@@ -30,59 +30,7 @@ const Plugin = () => {
     if (typeof options.titleSelector !== 'string')
       options.titleSelector = 'h1, h2, h3, h4, h5';
 
-    if (options.hideMissingTitles === undefined)
-      options.hideMissingTitles = false;
-
-    if (options.useTextContentForMissingTitles === undefined)
-      options.useTextContentForMissingTitles = false;
-
     if (options.markers === undefined) options.markers = true;
-
-    if (typeof options.themesPath !== 'string')
-      options.themesPath = 'dist/theme/';
-    if (!options.themesPath.endsWith('/')) options.themesPath += '/';
-
-    if (!select('link#theme')) options.themes = false;
-    if (options.themes === true) {
-      options.themes = [
-        { name: 'Black', theme: options.themesPath + 'black.css' },
-        { name: 'White', theme: options.themesPath + 'white.css' },
-        { name: 'League', theme: options.themesPath + 'league.css' },
-        { name: 'Sky', theme: options.themesPath + 'sky.css' },
-        { name: 'Beige', theme: options.themesPath + 'beige.css' },
-        { name: 'Simple', theme: options.themesPath + 'simple.css' },
-        { name: 'Serif', theme: options.themesPath + 'serif.css' },
-        { name: 'Blood', theme: options.themesPath + 'blood.css' },
-        { name: 'Night', theme: options.themesPath + 'night.css' },
-        { name: 'Moon', theme: options.themesPath + 'moon.css' },
-        { name: 'Solarized', theme: options.themesPath + 'solarized.css' }
-      ];
-    } else if (!Array.isArray(options.themes)) {
-      options.themes = false;
-    }
-
-    if (options.transitions === undefined) options.transitions = false;
-    if (options.transitions === true) {
-      options.transitions = [
-        'None',
-        'Fade',
-        'Slide',
-        'Convex',
-        'Concave',
-        'Zoom'
-      ];
-    } else if (
-      options.transitions !== false &&
-      (!Array.isArray(options.transitions) ||
-        !options.transitions.every(function (e) {
-          return typeof e === 'string';
-        }))
-    ) {
-      console.error(
-        "reveal.js-menu error: transitions config value must be 'true' or an array of strings, eg ['None', 'Fade', 'Slide')"
-      );
-      options.transitions = false;
-    }
     
     if (typeof options.openButton === 'undefined') options.openButton = true;
 
@@ -161,30 +109,6 @@ const Plugin = () => {
       select('.slide-menu').classList.add('active');
       select('.slide-menu-overlay').classList.add('active');
 
-      // identify active theme
-      if (options.themes) {
-        selectAll('div[data-panel="Themes"] li').forEach(function (i) {
-          i.classList.remove('active');
-        });
-        selectAll(
-          'li[data-theme="' + select('link#theme').getAttribute('href') + '"]'
-        ).forEach(function (i) {
-          i.classList.add('active');
-        });
-      }
-
-      // identify active transition
-      if (options.transitions) {
-        selectAll('div[data-panel="Transitions"] li').forEach(function (i) {
-          i.classList.remove('active');
-        });
-        selectAll('li[data-transition="' + config.transition + '"]').forEach(
-          function (i) {
-            i.classList.add('active');
-          }
-        );
-      }
-
       // set item selections to match active items
       var items = selectAll('.slide-menu-panel li.active');
       items.forEach(function (i) {
@@ -206,14 +130,6 @@ const Plugin = () => {
       selectAll('.slide-menu-panel li.selected').forEach(function (i) {
         i.classList.remove('selected');
       });
-    }
-  }
-
-  function toggleMenu(event) {
-    if (isOpen()) {
-      closeMenu(event, true);
-    } else {
-      openMenu(event);
     }
   }
 
@@ -377,18 +293,6 @@ const Plugin = () => {
         });
       }
 
-      if (options.themes) {
-        addToolbarButton('Themes', 'Themes', 'fa-adjust', 'fas', openPanel);
-      }
-      if (options.transitions) {
-        addToolbarButton(
-          'Transitions',
-          'Transitions',
-          'fa-sticky-note',
-          'fas',
-          openPanel
-        );
-      }
       var button = create('li', {
         id: 'close',
         class: 'toolbar-panel-button'
@@ -421,29 +325,7 @@ const Plugin = () => {
           text('.menu-title', section) ||
           text(options.titleSelector, section);
 
-        if (!title && options.useTextContentForMissingTitles) {
-          // attempt to figure out a title based on the text in the slide
-          title = section.textContent.trim();
-          if (title) {
-            title =
-              title
-                .split('\n')
-                .map(function (t) {
-                  return t.trim();
-                })
-                .join(' ')
-                .trim()
-                .replace(/^(.{16}[^\s]*).*/, '$1') // limit to 16 chars plus any consecutive non-whitespace chars (to avoid breaking words)
-                .replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;')
-                .replace(/"/g, '&quot;')
-                .replace(/'/g, '&#039;') + '...';
-          }
-        }
-
         if (!title) {
-          if (options.hideMissingTitles) return '';
           type += ' no-title';
           title = 'Slide ' + (i + 1);
         }
@@ -616,10 +498,6 @@ const Plugin = () => {
     initialised = true;
   }
 
-  /**
-   * Dispatches an event of the specified type from the
-   * reveal DOM element.
-   */
   function dispatchEvent(type) {
     const event = new Event("menu-ready")
     document.querySelector('.reveal').dispatchEvent(event);
@@ -684,16 +562,6 @@ const Plugin = () => {
       initOptions(config);
       await loadCSSResource(options.path + 'menu.css');
       loadPlugin();
-    },
-
-    toggle: toggleMenu,
-    openMenu: openMenu,
-    closeMenu: closeMenu,
-    openPanel: openPanel,
-    isOpen: isOpen,
-    initialiseMenu: initMenu,
-    isMenuInitialised: function () {
-      return initialised;
     }
   };
 };
