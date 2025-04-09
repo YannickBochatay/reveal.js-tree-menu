@@ -1,3 +1,4 @@
 # reveal.js-tree-menu
+Tree menu plugin for reveal.js presentations.
 
-Forked from [https://github.com/denehyg/reveal.js-menu](https://github.com/denehyg/reveal.js-menu)
+Inspired by [https://github.com/denehyg/reveal.js-menu](https://github.com/denehyg/reveal.js-menu)

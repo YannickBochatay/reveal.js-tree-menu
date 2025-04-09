@@ -1,7 +1,7 @@
 {
-  "name": "reveal.js-menu",
-  "version": "2.1.0",
-  "description": "A slideout menu for navigating reveal.js presentations",
+  "name": "reveal.js-tree-menu",
+  "version": "0.0.1",
+  "description": "A slideout tree menu for navigating reveal.js presentations",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "gulp"
@@ -14,12 +14,12 @@
     "reveal",
     "menu"
   ],
-  "author": "Greg Denehy",
+  "authors": ["Greg Denehy", "Yannick Bochatay"],
   "license": "MIT, Copyright (C) 2020 Greg Denehy",
   "bugs": {
-    "url": "https://github.com/denehyg/reveal.js-menu/issues"
+    "url": "https://github.com/YannickBochatay/reveal.js-tree-menu/issues"
   },
-  "homepage": "https://github.com/denehyg/reveal.js-menu#readme",
+  "homepage": "https://github.com/YannickBochatay/reveal.js-tree-menu",
   "devDependencies": {
     "reveal.js": "^5.2.1"
   }
