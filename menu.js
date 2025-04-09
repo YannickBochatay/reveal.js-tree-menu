@@ -231,17 +231,6 @@ const Plugin = () => {
       var panels = create('nav', {
         class: 'slide-menu slide-menu--' + options.side
       });
-      if (typeof options.width === 'string') {
-        if (
-          ['normal', 'wide', 'third', 'half', 'full'].indexOf(options.width) !=
-          -1
-        ) {
-          panels.classList.add('slide-menu--' + options.width);
-        } else {
-          panels.classList.add('slide-menu--custom');
-          panels.style.width = options.width;
-        }
-      }
       top.appendChild(panels);
       matchRevealStyle();
       var overlay = create('div', { class: 'slide-menu-overlay' });
