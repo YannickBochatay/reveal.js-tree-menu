@@ -7,6 +7,13 @@ export function select(selector, el = document) {
   return el.querySelector(selector);
 }
 
+export function text(selector, parent) {
+  if (selector === '') return null;
+  var el = parent ? select(selector, parent) : select(selector);
+  if (el) return el.textContent;
+  return null;
+}
+
 export function selectAll(selector, el = document) {
   return el.querySelectorAll(selector);
 }
@@ -25,12 +32,12 @@ export function create(tagName, attrs, content) {
 export function loadCSSResource(url) {
   return new Promise((resolve, reject) => {
     var head = document.querySelector('head');
-    var resource = document.createElement('link');
-    resource.rel = 'stylesheet';
-    resource.href = url;
-    resource.onload = resolve;
-    resource.onerror = reject;
+    var res = document.createElement('link');
+    res.rel = 'stylesheet';
+    res.href = url;
+    res.onload = resolve;
+    res.onerror = reject;
 
-    head.appendChild(resource);
+    head.appendChild(res);
   })
 }

@@ -26,17 +26,12 @@
   border-bottom: solid 1px #555;
 }
 
-.slide-menu-wrapper .slide-menu-item,
-.slide-menu-wrapper .slide-menu-item-vertical {
+.slide-menu-wrapper .slide-menu-item {
   display: block;
   text-align: left;
   padding: 10px 18px;
   color: #aaa;
   cursor: pointer;
-}
-
-.slide-menu-wrapper .slide-menu-item-vertical {
-  padding-left: 30px;
 }
 
 .slide-menu-wrapper .slide-menu-item {
@@ -203,18 +198,6 @@
   width: calc(100% + 20px);
   margin-left: -10px;
   margin-right: 10px;
-}
-
-/*
- * Theme and Transitions buttons
- */
-
-.slide-menu-wrapper div[data-panel='Themes'] li,
-.slide-menu-wrapper div[data-panel='Transitions'] li {
-  display: block;
-  text-align: left;
-  cursor: pointer;
-  color: #848484;
 }
 
 /*

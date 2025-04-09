@@ -3,7 +3,7 @@
  * MIT licensed
  * (c) Greg Denehy 2020
  */
-import { select, selectAll, loadCSSResource, create, dispatchEvent } from "./utils.js";
+import { select, selectAll, text, loadCSSResource, create, dispatchEvent } from "./utils.js";
 
 export default function Plugin() {
   
@@ -25,9 +25,6 @@ export default function Plugin() {
 
     // Set defaults
     if (options.side === undefined) options.side = 'left';
-
-    if (typeof options.titleSelector !== 'string')
-      options.titleSelector = 'h1, h2, h3, h4, h5';
 
     if (typeof options.sticky === 'undefined') options.sticky = false;
 
@@ -157,7 +154,7 @@ export default function Plugin() {
 
   function highlightCurrentSlide() {
     var state = deck.getState();
-    selectAll('li.slide-menu-item, li.slide-menu-item-vertical').forEach(
+    selectAll('li.slide-menu-item').forEach(
       function (item) {
         item.classList.remove('past');
         item.classList.remove('active');
@@ -196,23 +193,18 @@ export default function Plugin() {
       // Slide links
       //
       function generateItem(type, section, i, h, v) {
-        var link = '/#/' + h;
+        let link = '/#/' + h;
         if (typeof v === 'number' && !isNaN(v)) link += '/' + v;
+        
+        const titleNode = select('h1, h2, h3, h4, h5, h6', section);
+        let title
 
-        function text(selector, parent) {
-          if (selector === '') return null;
-          var el = parent ? select(selector, section) : select(selector);
-          if (el) return el.textContent;
-          return null;
-        }
-        var title =
-          section.getAttribute('data-menu-title') ||
-          text('.menu-title', section) ||
-          text(options.titleSelector, section);
-
-        if (!title) {
+        if (!titleNode) {
           type += ' no-title';
           title = 'Slide ' + (i + 1);
+        } else {
+          const titleType = titleNode.tagName.charAt(1)
+          title = "\u00a0".repeat((titleType - 1) * 2) + titleNode.textContent
         }
 
         var item = create('li', {
@@ -238,7 +230,7 @@ export default function Plugin() {
           'data-panel': 'Slides',
           class: 'slide-menu-panel active-menu-panel'
         });
-        panel.appendChild(create('ul', { class: 'slide-menu-items' }));
+        panel.appendChild(create('ol', { class: 'slide-menu-items' }));
         panels.appendChild(panel);
         var items = select(
           '.slide-menu-panel[data-panel="Slides"] > .slide-menu-items'
@@ -248,12 +240,9 @@ export default function Plugin() {
           var subsections = selectAll('section', section);
           if (subsections.length > 0) {
             subsections.forEach(function (subsection, v) {
-              var type =
-                v === 0 ? 'slide-menu-item' : 'slide-menu-item-vertical';
+              var type = 'slide-menu-item';
               var item = generateItem(type, subsection, slideCount, h, v);
-              if (item) {
-                items.appendChild(item);
-              }
+              if (item) items.appendChild(item);
               slideCount++;
             });
           } else {
@@ -263,17 +252,11 @@ export default function Plugin() {
               slideCount,
               h
             );
-            if (item) {
-              items.appendChild(item);
-            }
+            if (item) items.appendChild(item);
             slideCount++;
           }
         });
-        selectAll('.slide-menu-item, .slide-menu-item-vertical').forEach(
-          function (i) {
-            i.onclick = clicked;
-          }
-        );
+        selectAll('.slide-menu-item').forEach(i => i.onclick = clicked);
         highlightCurrentSlide();
       }
 
