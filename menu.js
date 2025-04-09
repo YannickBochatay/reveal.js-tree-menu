@@ -125,37 +125,12 @@ export default function Plugin() {
     return select('body').classList.contains('slide-menu-active');
   }
 
-  function openPanel(event, ref) {
-    openMenu(event);
-    var panel = ref;
-    if (typeof ref !== 'string') {
-      panel = event.currentTarget.getAttribute('data-panel');
-    }
-    select('.slide-menu-toolbar > li.active-toolbar-button').classList.remove(
-      'active-toolbar-button'
-    );
-    select('li[data-panel="' + panel + '"]').classList.add(
-      'active-toolbar-button'
-    );
-    select('.slide-menu-panel.active-menu-panel').classList.remove(
-      'active-menu-panel'
-    );
-    select('div[data-panel="' + panel + '"]').classList.add(
-      'active-menu-panel'
-    );
-  }
-
   function openItem(item, force) {
     var h = parseInt(item.getAttribute('data-slide-h'));
     var v = parseInt(item.getAttribute('data-slide-v'));
-    var transition = item.getAttribute('data-transition');
 
     if (!isNaN(h) && !isNaN(v)) {
       deck.slide(h, v);
-    }
-
-    if (transition) {
-      deck.configure({ transition: transition });
     }
 
     var link = select('a', item);
@@ -203,7 +178,6 @@ export default function Plugin() {
     );
   }
 
-  var buttons = 0;
   function initMenu() {
     if (!initialised) {
       var parent = select('.reveal').parentElement;
@@ -258,56 +232,51 @@ export default function Plugin() {
       }
 
       function createSlideMenu() {
-        if (
-          !document.querySelector(
-            'section[data-markdown]:not([data-markdown-parsed])'
-          )
-        ) {
-          var panel = create('div', {
-            'data-panel': 'Slides',
-            class: 'slide-menu-panel active-menu-panel'
-          });
-          panel.appendChild(create('ul', { class: 'slide-menu-items' }));
-          panels.appendChild(panel);
-          var items = select(
-            '.slide-menu-panel[data-panel="Slides"] > .slide-menu-items'
-          );
-          var slideCount = 0;
-          selectAll('.slides > section').forEach(function (section, h) {
-            var subsections = selectAll('section', section);
-            if (subsections.length > 0) {
-              subsections.forEach(function (subsection, v) {
-                var type =
-                  v === 0 ? 'slide-menu-item' : 'slide-menu-item-vertical';
-                var item = generateItem(type, subsection, slideCount, h, v);
-                if (item) {
-                  items.appendChild(item);
-                }
-                slideCount++;
-              });
-            } else {
-              var item = generateItem(
-                'slide-menu-item',
-                section,
-                slideCount,
-                h
-              );
+        if (select('section[data-markdown]:not([data-markdown-parsed])')) {
+          setTimeout(createSlideMenu, 100);
+          return;
+        }
+        var panel = create('div', {
+          'data-panel': 'Slides',
+          class: 'slide-menu-panel active-menu-panel'
+        });
+        panel.appendChild(create('ul', { class: 'slide-menu-items' }));
+        panels.appendChild(panel);
+        var items = select(
+          '.slide-menu-panel[data-panel="Slides"] > .slide-menu-items'
+        );
+        var slideCount = 0;
+        selectAll('.slides > section').forEach(function (section, h) {
+          var subsections = selectAll('section', section);
+          if (subsections.length > 0) {
+            subsections.forEach(function (subsection, v) {
+              var type =
+                v === 0 ? 'slide-menu-item' : 'slide-menu-item-vertical';
+              var item = generateItem(type, subsection, slideCount, h, v);
               if (item) {
                 items.appendChild(item);
               }
               slideCount++;
+            });
+          } else {
+            var item = generateItem(
+              'slide-menu-item',
+              section,
+              slideCount,
+              h
+            );
+            if (item) {
+              items.appendChild(item);
             }
-          });
-          selectAll('.slide-menu-item, .slide-menu-item-vertical').forEach(
-            function (i) {
-              i.onclick = clicked;
-            }
-          );
-          highlightCurrentSlide();
-        } else {
-          // wait for markdown to be loaded and parsed
-          setTimeout(createSlideMenu, 100);
-        }
+            slideCount++;
+          }
+        });
+        selectAll('.slide-menu-item, .slide-menu-item-vertical').forEach(
+          function (i) {
+            i.onclick = clicked;
+          }
+        );
+        highlightCurrentSlide();
       }
 
       createSlideMenu();
