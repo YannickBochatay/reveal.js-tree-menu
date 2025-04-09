@@ -30,18 +30,9 @@ const Plugin = () => {
 
     if (typeof options.openButton === 'undefined') options.openButton = true;
 
-    if (typeof options.openSlideNumber === 'undefined')
-      options.openSlideNumber = false;
-
-    if (typeof options.keyboard === 'undefined') options.keyboard = true;
-
     if (typeof options.sticky === 'undefined') options.sticky = false;
 
     if (typeof options.autoOpen === 'undefined') options.autoOpen = true;
-
-    if (typeof options.delayInit === 'undefined') options.delayInit = false;
-
-    if (typeof options.openOnInit === 'undefined') options.openOnInit = false;
   }
 
   var mouseSelectionEnabled = true;
@@ -334,11 +325,6 @@ const Plugin = () => {
         div.onclick = openMenu;
       }
 
-      if (options.openSlideNumber) {
-        var slideNumber = select('div.slide-number');
-        slideNumber.onclick = openMenu;
-      }
-
       //
       // Handle mouse overs
       //
@@ -358,10 +344,6 @@ const Plugin = () => {
           event.currentTarget.classList.add('selected');
         }
       }
-    }
-
-    if (options.openOnInit) {
-      openMenu();
     }
 
     initialised = true;
@@ -405,24 +387,6 @@ const Plugin = () => {
     })
   }
 
-  function loadPlugin() {
-    // does not support IE8 or below
-    var supported = true;
-
-    // do not load the menu in the upcoming slide panel in the speaker notes
-    if (
-      deck.isSpeakerNotes() &&
-      window.location.search.endsWith('controls=false')
-    ) {
-      supported = false;
-    }
-
-    if (supported) {
-      if (!options.delayInit) initMenu();
-      dispatchEvent('menu-ready');
-    }
-  }
-
   return {
     id: 'menu',
     init: async reveal => {
@@ -430,7 +394,8 @@ const Plugin = () => {
       config = deck.getConfig();
       initOptions(config);
       await loadCSSResource(options.path + 'menu.css');
-      loadPlugin();
+      initMenu();
+      dispatchEvent('menu-ready');
     }
   };
 };
