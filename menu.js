@@ -25,13 +25,9 @@ const Plugin = () => {
     // Set defaults
     if (options.side === undefined) options.side = 'left';
 
-    if (options.numbers === undefined) options.numbers = false;
-
     if (typeof options.titleSelector !== 'string')
       options.titleSelector = 'h1, h2, h3, h4, h5';
 
-    if (options.markers === undefined) options.markers = true;
-    
     if (typeof options.openButton === 'undefined') options.openButton = true;
 
     if (typeof options.openSlideNumber === 'undefined')
@@ -215,13 +211,6 @@ const Plugin = () => {
     );
   }
 
-  function matchRevealStyle() {
-    var revealStyle = window.getComputedStyle(select('.reveal'));
-    var element = select('.slide-menu');
-    element.style.fontFamily = revealStyle.fontFamily;
-    //XXX could adjust the complete menu style to match the theme, ie colors, etc
-  }
-
   var buttons = 0;
   function initMenu() {
     if (!initialised) {
@@ -232,70 +221,13 @@ const Plugin = () => {
         class: 'slide-menu slide-menu--' + options.side
       });
       top.appendChild(panels);
-      matchRevealStyle();
+
       var overlay = create('div', { class: 'slide-menu-overlay' });
       top.appendChild(overlay);
       overlay.onclick = function () {
         closeMenu(null, true);
       };
-
-      var toolbar = create('ol', { class: 'slide-menu-toolbar' });
-      select('.slide-menu').appendChild(toolbar);
-
-      function addToolbarButton(title, ref, icon, style, fn, active) {
-        var attrs = {
-          'data-button': '' + buttons++,
-          class:
-            'toolbar-panel-button' + (active ? ' active-toolbar-button' : '')
-        };
-        if (ref) {
-          attrs['data-panel'] = ref;
-        }
-        var button = create('li', attrs);
-
-        if (icon.startsWith('fa-')) {
-          button.appendChild(create('i', { class: style + ' ' + icon }));
-        } else {
-          button.innerHTML = icon + '</i>';
-        }
-        button.appendChild(create('br'), select('i', button));
-        button.appendChild(
-          create('span', { class: 'slide-menu-toolbar-label' }, title),
-          select('i', button)
-        );
-        button.onclick = fn;
-        toolbar.appendChild(button);
-        return button;
-      }
-
-      addToolbarButton('Slides', 'Slides', 'fa-images', 'fas', openPanel, true);
-
-      if (options.custom) {
-        options.custom.forEach(function (element, index, array) {
-          addToolbarButton(
-            element.title,
-            'Custom' + index,
-            element.icon,
-            null,
-            openPanel
-          );
-        });
-      }
-
-      var button = create('li', {
-        id: 'close',
-        class: 'toolbar-panel-button'
-      });
-      button.appendChild(create('i', { class: 'fas fa-times' }));
-      button.appendChild(create('br'));
-      button.appendChild(
-        create('span', { class: 'slide-menu-toolbar-label' }, 'Close')
-      );
-      button.onclick = function () {
-        closeMenu(null, true);
-      };
-      toolbar.appendChild(button);
-
+      
       //
       // Slide links
       //
@@ -325,58 +257,6 @@ const Plugin = () => {
           'data-slide-h': h,
           'data-slide-v': v === undefined ? 0 : v
         });
-
-        if (options.markers) {
-          item.appendChild(
-            create('i', { class: 'fas fa-check-circle fa-fw past' })
-          );
-          item.appendChild(
-            create('i', {
-              class: 'fas fa-arrow-alt-circle-right fa-fw active'
-            })
-          );
-          item.appendChild(
-            create('i', { class: 'far fa-circle fa-fw future' })
-          );
-        }
-
-        if (options.numbers) {
-          // Number formatting taken from reveal.js
-          var value = [];
-          var format = 'h.v';
-
-          // Check if a custom number format is available
-          if (typeof options.numbers === 'string') {
-            format = options.numbers;
-          } else if (typeof config.slideNumber === 'string') {
-            // Take user defined number format for slides
-            format = config.slideNumber;
-          }
-
-          switch (format) {
-            case 'c':
-              value.push(i + 1);
-              break;
-            case 'c/t':
-              value.push(i + 1, '/', deck.getTotalSlides());
-              break;
-            case 'h/v':
-              value.push(h + 1);
-              if (typeof v === 'number' && !isNaN(v)) value.push('/', v + 1);
-              break;
-            default:
-              value.push(h + 1);
-              if (typeof v === 'number' && !isNaN(v)) value.push('.', v + 1);
-          }
-
-          item.appendChild(
-            create(
-              'span',
-              { class: 'slide-menu-item-number' },
-              value.join('') + '. '
-            )
-          );
-        }
 
         item.appendChild(
           create('span', { class: 'slide-menu-item-title' }, title)

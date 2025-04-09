@@ -128,58 +128,6 @@
 }
 
 /*
- * Toolbar
- */
-.slide-menu-wrapper .slide-menu-toolbar {
-  height: 60px;
-  width: 100%;
-  font-size: 12px;
-  display: table;
-  table-layout: fixed; /* ensures equal width */
-  margin: 0;
-  padding: 0;
-  border-bottom: solid 2px #666;
-}
-
-.slide-menu-wrapper .slide-menu-toolbar > li {
-  display: table-cell;
-  line-height: 150%;
-  text-align: center;
-  vertical-align: middle;
-  cursor: pointer;
-  color: #aaa;
-  border-radius: 3px;
-}
-
-.slide-menu-wrapper .slide-menu-toolbar > li.toolbar-panel-button i,
-.slide-menu-wrapper
-  .slide-menu-toolbar
-  > li.toolbar-panel-button
-  svg.svg-inline--fa {
-  font-size: 1.7em;
-}
-
-.slide-menu-wrapper .slide-menu-toolbar > li.active-toolbar-button {
-  color: white;
-  text-shadow: 0 1px black;
-  text-decoration: underline;
-}
-
-.slide-menu-toolbar > li.toolbar-panel-button:hover {
-  color: white;
-}
-
-.slide-menu-toolbar
-  > li.toolbar-panel-button:hover
-  span.slide-menu-toolbar-label,
-.slide-menu-wrapper
-  .slide-menu-toolbar
-  > li.active-toolbar-button
-  span.slide-menu-toolbar-label {
-  visibility: visible;
-}
-
-/*
  * Panels
  */
 .slide-menu-wrapper .slide-menu-panel {
