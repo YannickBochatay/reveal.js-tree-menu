@@ -3,8 +3,9 @@
  * MIT licensed
  * (c) Greg Denehy 2020
  */
+import { select, selectAll, loadCSSResource, create, dispatchEvent } from "./utils.js";
 
-const Plugin = () => {
+export default function Plugin() {
   
   var deck;
   var config;
@@ -349,43 +350,7 @@ const Plugin = () => {
     initialised = true;
   }
 
-  function dispatchEvent(type) {
-    const event = new Event("menu-ready")
-    document.querySelector('.reveal').dispatchEvent(event);
-  }
-
-  function select(selector, el = document) {
-    return el.querySelector(selector);
-  }
-
-  function selectAll(selector, el = document) {
-    return el.querySelectorAll(selector);
-  }
-
-  function create(tagName, attrs, content) {
-    var el = document.createElement(tagName);
-    if (attrs) {
-      Object.getOwnPropertyNames(attrs).forEach(function (n) {
-        el.setAttribute(n, attrs[n]);
-      });
-    }
-    if (content) el.innerHTML = content;
-    return el;
-  }
-
-  // modified from math plugin
-  function loadCSSResource(url) {
-    return new Promise((resolve, reject) => {
-      var head = document.querySelector('head');
-      var resource = document.createElement('link');
-      resource.rel = 'stylesheet';
-      resource.href = url;
-      resource.onload = resolve;
-      resource.onerror = reject;
   
-      head.appendChild(resource);
-    })
-  }
 
   return {
     id: 'menu',
@@ -398,6 +363,4 @@ const Plugin = () => {
       dispatchEvent('menu-ready');
     }
   };
-};
-
-export default Plugin;
+}
