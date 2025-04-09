@@ -29,8 +29,6 @@ export default function Plugin() {
     if (typeof options.titleSelector !== 'string')
       options.titleSelector = 'h1, h2, h3, h4, h5';
 
-    if (typeof options.openButton === 'undefined') options.openButton = true;
-
     if (typeof options.sticky === 'undefined') options.sticky = false;
 
     if (typeof options.autoOpen === 'undefined') options.autoOpen = true;
@@ -282,18 +280,13 @@ export default function Plugin() {
       createSlideMenu();
       deck.addEventListener('slidechanged', highlightCurrentSlide);
 
-      //
-      // Open menu options
-      //
-      if (options.openButton) {
-        // add menu button
-        var div = create('div', { class: 'slide-menu-button' });
-        var link = create('a', { href: '#' });
-        link.appendChild(create('span', null, "☰"));
-        div.appendChild(link);
-        select('.reveal').appendChild(div);
-        div.onclick = openMenu;
-      }
+
+      var div = create('div', { class: 'slide-menu-button' });
+      var link = create('a', { href: '#' });
+      link.appendChild(create('span', null, "☰"));
+      div.appendChild(link);
+      select('.reveal').appendChild(div);
+      div.onclick = openMenu;
 
       //
       // Handle mouse overs
