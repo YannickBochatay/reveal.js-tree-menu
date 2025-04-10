@@ -7,23 +7,6 @@ function create(tagName, attrs, content) {
   return el;
 }
 
-function toggleMenu(e) {
-  if (e) e.preventDefault()
-  
-  const className = "active"
-  const { classList } = document.querySelector('.slide-menu')
-  const isActive = classList.contains(className)
-  const button = document.querySelector(".slide-menu-button")
-
-  if (isActive) {
-    classList.remove(className)
-    button.textContent = "☰"
-  } else {
-    classList.add(className)
-    button.textContent = "✖"
-  }
-}
-
 function highlightCurrentSlide(e = { indexh : 0, indexv : 0 }) {
   document.querySelectorAll('.slide-menu nav li > a').forEach(item => {
     const url = new URL(item.href)
@@ -33,15 +16,25 @@ function highlightCurrentSlide(e = { indexh : 0, indexv : 0 }) {
   })
 }
 
-function createMenu() {
+function createContainer() {
   const container = create('div', { class: 'slide-menu' })
   document.body.appendChild(container)
-    
+}
+
+function createButton() {
+  let link = create('a', { href: '#', class: 'slide-menu-button' }, "☰")
+  let container = document.querySelector('.slide-menu')
+  container.appendChild(link)
+  link.addEventListener("click", () => container.classList.add("active"))
+}
+
+function createMenu() {
+      
   const nav = create('nav')
-  container.appendChild(nav)
+  document.querySelector('.slide-menu').appendChild(nav)
 
   let slideCount = 0
-  let currentType = 0
+  let currentType
   let parent
 
   function generateItem(section, i, h, v) {
@@ -52,10 +45,10 @@ function createMenu() {
     const title = titleNode ? titleNode.textContent : 'Slide ' + (i + 1)
     const titleType = titleNode ? Number(titleNode.tagName.charAt(1)) : currentType
 
-    const li = create('li');
-    const link = create('a', { href }, title)
+    const li = create('li')
+    li.appendChild( create('a', { href }, title) )
 
-    if (!parent) {
+    if (!currentType) {
       parent = create("ul")
       nav.appendChild(parent)
     } else if (titleType > currentType) {
@@ -64,13 +57,13 @@ function createMenu() {
       ol.appendChild(li)
       parent = ol
     } else if (titleType < currentType && parent !== nav.firstElementChild) {
-      parent = parent.parentNode.parentNode
+      for (let i=0; i<currentType-titleType;i++) {
+        parent = parent.parentNode
+      }
     }
-
-    currentType = titleType
     
-    li.appendChild(link)
     parent.appendChild(li)
+    currentType = titleType
     slideCount++
   }
 
@@ -81,7 +74,6 @@ function createMenu() {
     }
     
     document.querySelectorAll('.slides > section').forEach((section, h) => {
-
       let subsections = section.querySelectorAll('section')
 
       if (subsections.length > 0) {
@@ -95,18 +87,18 @@ function createMenu() {
 
   createMenuItems()
 
-  function createButton() {
-    let link = create('a', { href: '#', class: 'slide-menu-button' }, "☰")    
-    document.body.appendChild(link)
-    link.addEventListener("click", toggleMenu)
-  }
-
-  createButton()
+  document.addEventListener("click", e => {
+    if (!nav.contains(e.target) && !e.target.matches('.slide-menu-button')) {
+      document.querySelector(".slide-menu").classList.remove("active")
+    }
+  })
 }
 
 export default {
   id: 'menu',
   init(reveal){
+    createContainer()
+    createButton()
     createMenu()
     reveal.addEventListener('slidechanged', highlightCurrentSlide)
   }
