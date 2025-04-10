@@ -1,311 +1,113 @@
-/*
- * Reveal.js menu plugin
- * MIT licensed
- * (c) Greg Denehy 2020
- */
-import { select, selectAll, text, loadCSSResource, create, dispatchEvent } from "./utils.js";
+function create(tagName, attrs, content) {
+  const el = document.createElement(tagName);
+  if (attrs) {
+    for (const n in attrs) el.setAttribute(n, attrs[n])
+  }
+  if (content) el.innerHTML = content;
+  return el;
+}
 
-export default function Plugin() {
-  
-  var deck;
-  var config;
-  var options;
-  var initialised = false;
+function getMenu() {
+  return document.querySelector('.slide-menu-wrapper')
+}
 
-  function scriptPath() {
-    return import.meta.url.slice(0, import.meta.url.lastIndexOf('/') + 1);
+function openMenu(e) {
+  if (e) e.preventDefault()
+  getMenu().classList.add('active')
+}
+
+function closeMenu(e) {
+  if (e) e.preventDefault()
+  getMenu().classList.remove('active')
+}
+
+function highlightCurrentSlide(e = { indexh : 0, indexv : 0 }) {
+  document.querySelectorAll('nav.slide-menu li > a').forEach(item => {
+    const url = new URL(item.href)
+    const currentHash = e ? `#/${e.indexh}${e.indexv ? '/' + e.indexv : ''}` : location.hash
+    const method = (url.hash === currentHash) ? "add" : "remove"
+    item.classList[method]('active')
+  })
+}
+
+function createMenu() {
+  const parent = document.querySelector('.reveal').parentElement
+  const wrapper = create('div', { class: 'slide-menu-wrapper' })
+  parent.appendChild(wrapper)
+    
+  const nav = create('nav', { class: 'slide-menu' })
+  wrapper.appendChild(nav)
+
+  const ol = create('ol')
+  nav.appendChild(ol)
+
+  function generateItem(section, i, h, v) {
+    let href = '#/' + h;
+    if (v) href += '/' + v;
+    
+    const titleNode = section.querySelector('h1, h2, h3, h4, h5, h6', )
+    const title = titleNode ? titleNode.textContent : 'Slide ' + (i + 1)
+    const titleType = titleNode.tagName.charAt(1)
+
+    let item = create('li');
+    let link = create('a', { href }, title)
+    link.style.paddingLeft = (titleType * 10) + "px"
+    
+    item.appendChild(link)
+    ol.appendChild(item)
+
+    return item;
   }
 
-  function initOptions(config) {
-    options = config.menu || {};
-    options.path = options.path || scriptPath() || 'plugin/menu/';
-    if (!options.path.endsWith('/')) {
-      options.path += '/';
+  function createMenuItems() {
+    if (document.querySelector('section[data-markdown]:not([data-markdown-parsed])')) {
+      setTimeout(createMenuItems, 100)
+      return
     }
+                
+    let slideCount = 0
 
-    // Set defaults
-    if (options.side === undefined) options.side = 'left';
+    document.querySelectorAll('.slides > section').forEach((section, h) => {
 
-    if (typeof options.sticky === 'undefined') options.sticky = false;
+      let subsections = section.querySelectorAll('section')
 
-    if (typeof options.autoOpen === 'undefined') options.autoOpen = true;
-  }
+      if (subsections.length > 0) {
 
-  var mouseSelectionEnabled = true;
-  function disableMouseSelection() {
-    mouseSelectionEnabled = false;
-  }
+        subsections.forEach((subsection, v) => {
+          let item = generateItem(subsection, slideCount, h, v)
+          if (item) ol.appendChild(item)
+          slideCount++
+        })
 
-  function reenableMouseSelection() {
-    // wait until the mouse has moved before re-enabling mouse selection
-    // to avoid selections on scroll
-    select('nav.slide-menu').addEventListener('mousemove', function fn(e) {
-      select('nav.slide-menu').removeEventListener('mousemove', fn);
-      //XXX this should select the item under the mouse
-      mouseSelectionEnabled = true;
-    });
-  }
+      } else {
 
-  //
-  // Keyboard handling
-  //
-  function getOffset(el) {
-    var _x = 0;
-    var _y = 0;
-    while (el && !isNaN(el.offsetLeft) && !isNaN(el.offsetTop)) {
-      _x += el.offsetLeft - el.scrollLeft;
-      _y += el.offsetTop - el.scrollTop;
-      el = el.offsetParent;
-    }
-    return { top: _y, left: _x };
-  }
-
-  function visibleOffset(el) {
-    var offsetFromTop = getOffset(el).top - el.offsetParent.offsetTop;
-    if (offsetFromTop < 0) return -offsetFromTop;
-    var offsetFromBottom =
-      el.offsetParent.offsetHeight -
-      (el.offsetTop - el.offsetParent.scrollTop + el.offsetHeight);
-    if (offsetFromBottom < 0) return offsetFromBottom;
-    return 0;
-  }
-
-  function keepVisible(el) {
-    var offset = visibleOffset(el);
-    if (offset) {
-      disableMouseSelection();
-      el.scrollIntoView(offset > 0);
-      reenableMouseSelection();
-    }
-  }
-  //
-  // Utilty functions
-  //
-
-  function openMenu(event) {
-    if (event) event.preventDefault();
-    if (!isOpen()) {
-      select('body').classList.add('slide-menu-active');
-      select('.reveal').classList.add(
-        'has-' + options.effect + '-' + options.side
-      );
-      select('.slide-menu').classList.add('active');
-      select('.slide-menu-overlay').classList.add('active');
-
-      // set item selections to match active items
-      var items = selectAll('.slide-menu-panel li.active');
-      items.forEach(function (i) {
-        i.classList.add('selected');
-        keepVisible(i);
-      });
-    }
-  }
-
-  function closeMenu(event, force) {
-    if (event) event.preventDefault();
-    if (!options.sticky || force) {
-      select('body').classList.remove('slide-menu-active');
-      select('.reveal').classList.remove(
-        'has-' + options.effect + '-' + options.side
-      );
-      select('.slide-menu').classList.remove('active');
-      select('.slide-menu-overlay').classList.remove('active');
-      selectAll('.slide-menu-panel li.selected').forEach(function (i) {
-        i.classList.remove('selected');
-      });
-    }
-  }
-
-  function isOpen() {
-    return select('body').classList.contains('slide-menu-active');
-  }
-
-  function openItem(item, force) {
-    var h = parseInt(item.getAttribute('data-slide-h'));
-    var v = parseInt(item.getAttribute('data-slide-v'));
-
-    if (!isNaN(h) && !isNaN(v)) {
-      deck.slide(h, v);
-    }
-
-    var link = select('a', item);
-    if (link) {
-      if (
-        force ||
-        !options.sticky ||
-        (options.autoOpen && link.href.startsWith('#')) ||
-        link.href.startsWith(
-          window.location.origin + window.location.pathname + '#'
-        )
-      ) {
-        link.click();
+        let item = generateItem(section, slideCount, h)
+        ol.appendChild(item);
+        slideCount++;
       }
-    }
-
-    closeMenu();
+    })
+    highlightCurrentSlide()
   }
 
-  function clicked(event) {
-    if (event.target.nodeName !== 'A') {
-      event.preventDefault();
-    }
-    openItem(event.currentTarget);
+  createMenuItems()
+
+  function createButton() {
+    let div = create('div', { class: 'slide-menu-button' })
+    let link = create('a', { href: '#' })
+    link.appendChild(create('span', null, "☰"))
+    div.appendChild(link)
+    
+    document.querySelector('.reveal').appendChild(div)
+    div.addEventListener("click", openMenu)
   }
 
-  function highlightCurrentSlide() {
-    var state = deck.getState();
-    selectAll('li.slide-menu-item').forEach(
-      function (item) {
-        item.classList.remove('past');
-        item.classList.remove('active');
-        item.classList.remove('future');
+  createButton()
+}
 
-        var h = parseInt(item.getAttribute('data-slide-h'));
-        var v = parseInt(item.getAttribute('data-slide-v'));
-        if (h < state.indexh || (h === state.indexh && v < state.indexv)) {
-          item.classList.add('past');
-        } else if (h === state.indexh && v === state.indexv) {
-          item.classList.add('active');
-        } else {
-          item.classList.add('future');
-        }
-      }
-    );
+export default {
+  id: 'menu',
+  init(reveal){
+    createMenu()
+    reveal.addEventListener('slidechanged', highlightCurrentSlide)
   }
-
-  function initMenu() {
-    if (!initialised) {
-      var parent = select('.reveal').parentElement;
-      var top = create('div', { class: 'slide-menu-wrapper' });
-      parent.appendChild(top);
-      var panels = create('nav', {
-        class: 'slide-menu slide-menu--' + options.side
-      });
-      top.appendChild(panels);
-
-      var overlay = create('div', { class: 'slide-menu-overlay' });
-      top.appendChild(overlay);
-      overlay.onclick = function () {
-        closeMenu(null, true);
-      };
-      
-      //
-      // Slide links
-      //
-      function generateItem(type, section, i, h, v) {
-        let link = '/#/' + h;
-        if (typeof v === 'number' && !isNaN(v)) link += '/' + v;
-        
-        const titleNode = select('h1, h2, h3, h4, h5, h6', section);
-        let title
-
-        if (!titleNode) {
-          type += ' no-title';
-          title = 'Slide ' + (i + 1);
-        } else {
-          const titleType = titleNode.tagName.charAt(1)
-          title = "\u00a0".repeat((titleType - 1) * 2) + titleNode.textContent
-        }
-
-        var item = create('li', {
-          class: type,
-          'data-item': i,
-          'data-slide-h': h,
-          'data-slide-v': v === undefined ? 0 : v
-        });
-
-        item.appendChild(
-          create('span', { class: 'slide-menu-item-title' }, title)
-        );
-
-        return item;
-      }
-
-      function createSlideMenu() {
-        if (select('section[data-markdown]:not([data-markdown-parsed])')) {
-          setTimeout(createSlideMenu, 100);
-          return;
-        }
-        var panel = create('div', {
-          'data-panel': 'Slides',
-          class: 'slide-menu-panel active-menu-panel'
-        });
-        panel.appendChild(create('ol', { class: 'slide-menu-items' }));
-        panels.appendChild(panel);
-        var items = select(
-          '.slide-menu-panel[data-panel="Slides"] > .slide-menu-items'
-        );
-        var slideCount = 0;
-        selectAll('.slides > section').forEach(function (section, h) {
-          var subsections = selectAll('section', section);
-          if (subsections.length > 0) {
-            subsections.forEach(function (subsection, v) {
-              var type = 'slide-menu-item';
-              var item = generateItem(type, subsection, slideCount, h, v);
-              if (item) items.appendChild(item);
-              slideCount++;
-            });
-          } else {
-            var item = generateItem(
-              'slide-menu-item',
-              section,
-              slideCount,
-              h
-            );
-            if (item) items.appendChild(item);
-            slideCount++;
-          }
-        });
-        selectAll('.slide-menu-item').forEach(i => i.onclick = clicked);
-        highlightCurrentSlide();
-      }
-
-      createSlideMenu();
-      deck.addEventListener('slidechanged', highlightCurrentSlide);
-
-
-      var div = create('div', { class: 'slide-menu-button' });
-      var link = create('a', { href: '#' });
-      link.appendChild(create('span', null, "☰"));
-      div.appendChild(link);
-      select('.reveal').appendChild(div);
-      div.onclick = openMenu;
-
-      //
-      // Handle mouse overs
-      //
-      selectAll('.slide-menu-panel .slide-menu-items li').forEach(function (
-        item
-      ) {
-        item.addEventListener('mouseenter', handleMouseHighlight);
-      });
-
-      function handleMouseHighlight(event) {
-        if (mouseSelectionEnabled) {
-          selectAll('.active-menu-panel .slide-menu-items li.selected').forEach(
-            function (i) {
-              i.classList.remove('selected');
-            }
-          );
-          event.currentTarget.classList.add('selected');
-        }
-      }
-    }
-
-    initialised = true;
-  }
-
-  
-
-  return {
-    id: 'menu',
-    init: async reveal => {
-      deck = reveal;
-      config = deck.getConfig();
-      initOptions(config);
-      await loadCSSResource(options.path + 'menu.css');
-      initMenu();
-      dispatchEvent('menu-ready');
-    }
-  };
 }
