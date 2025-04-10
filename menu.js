@@ -7,22 +7,17 @@ function create(tagName, attrs, content) {
   return el;
 }
 
-function getMenu() {
-  return document.querySelector('.slide-menu-wrapper')
-}
-
-function openMenu(e) {
+function toggleMenu(e) {
   if (e) e.preventDefault()
-  getMenu().classList.add('active')
-}
-
-function closeMenu(e) {
-  if (e) e.preventDefault()
-  getMenu().classList.remove('active')
+  
+  const className = "active"
+  const { classList } = document.querySelector('.slide-menu')
+  const method = classList.contains(className) ? "remove" : "add"
+  classList[method](className)
 }
 
 function highlightCurrentSlide(e = { indexh : 0, indexv : 0 }) {
-  document.querySelectorAll('nav.slide-menu li > a').forEach(item => {
+  document.querySelectorAll('.slide-menu nav li > a').forEach(item => {
     const url = new URL(item.href)
     const currentHash = e ? `#/${e.indexh}${e.indexv ? '/' + e.indexv : ''}` : location.hash
     const method = (url.hash === currentHash) ? "add" : "remove"
@@ -31,11 +26,12 @@ function highlightCurrentSlide(e = { indexh : 0, indexv : 0 }) {
 }
 
 function createMenu() {
-  const parent = document.querySelector('.reveal').parentElement
-  const wrapper = create('div', { class: 'slide-menu-wrapper' })
-  parent.appendChild(wrapper)
+  const reveal = document.querySelector('.reveal')
+  const parent = reveal.parentElement
+  const wrapper = create('div', { class: 'slide-menu' })
+  parent.insertBefore(wrapper, reveal)
     
-  const nav = create('nav', { class: 'slide-menu' })
+  const nav = create('nav')
   wrapper.appendChild(nav)
 
   const ol = create('ol')
@@ -72,15 +68,12 @@ function createMenu() {
       let subsections = section.querySelectorAll('section')
 
       if (subsections.length > 0) {
-
         subsections.forEach((subsection, v) => {
           let item = generateItem(subsection, slideCount, h, v)
           if (item) ol.appendChild(item)
           slideCount++
         })
-
       } else {
-
         let item = generateItem(section, slideCount, h)
         ol.appendChild(item);
         slideCount++;
@@ -92,13 +85,9 @@ function createMenu() {
   createMenuItems()
 
   function createButton() {
-    let div = create('div', { class: 'slide-menu-button' })
-    let link = create('a', { href: '#' })
-    link.appendChild(create('span', null, "☰"))
-    div.appendChild(link)
-    
-    document.querySelector('.reveal').appendChild(div)
-    div.addEventListener("click", openMenu)
+    let link = create('a', { href: '#', class: 'slide-menu-button' }, "☰")    
+    document.body.appendChild(link)
+    link.addEventListener("click", toggleMenu)
   }
 
   createButton()
