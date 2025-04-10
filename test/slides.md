@@ -1,6 +1,8 @@
-# BASES DE DONNEES
-## LE LANGAGE SQL
+# BASES DE DONNEES - LE LANGAGE SQL
 (**S**tructured **Q**uery **L**anguage)
+---
+
+## Généralités
 
 ---
 ### Historique
@@ -56,6 +58,8 @@ SELECT code_postal FROM ville WHERE nom='Toulouse'
 ```sql
 SELECT nb_habitants FROM ville WHERE code_postal LIKE "31%"
 ```
+---
+## DDL : langage de définition des données
 
 ---
 ### Les tables
@@ -87,7 +91,6 @@ CREATE TABLE cinema (
 - `CHECK` : spécifie une condition
 
 ---
-### Contraintes d'intégrité
 #### Exemple
 
 ```sql
@@ -157,7 +160,7 @@ Même idée qu'un index bibliographique.
 
 
 ---
-### Les index
+#### Syntaxe
 ```sql
 /* index unique (toutes les valeurs sont distinctes) */
 CREATE UNIQUE INDEX nom_index ON nom_table (attribut_1)
@@ -175,16 +178,14 @@ DROP INDEX nom_index
 Table dont les données ne sont pas physiquement stockées, mais qui se réfère à d'autres tables réelles.
 On parle de table virtuelle.
 ---
-###### Les vues
-### Avantages
+#### Avantages
 - dissocier et protéger l'accès aux tables en fonction des utilisateurs
 - restreindre les droits d'accès à certaines parties de tables
 - simplifier les requêtes complexes
 - améliorer les performances des requêtes
 
 ---
-###### Les vues
-### Syntaxe
+#### Syntaxe
 ```sql
 # Création
 CREATE [OR REPLACE] VIEW nom_vue
@@ -219,8 +220,7 @@ FROM liste_tables
 ```
 
 ---
-###### sélection simple
-### La clause SELECT
+#### La clause SELECT
 ```sql
 SELECT [DISTINCT]
   attr_1 [AS nom_1],
@@ -235,8 +235,7 @@ SELECT *
 - **\*** : sélection de tous les attributs
 
 ---
-###### sélection simple
-### La clause FROM
+#### La clause FROM
 Indique quelles relations sont utilisées par la requête
 ```sql
 FROM table_1 [AS nom_1], table_2 [AS nom_2], ...
@@ -244,8 +243,7 @@ FROM table_1 [AS nom_1], table_2 [AS nom_2], ...
 Si plusieurs relations &rarr; produit cartésien
 
 ---
-###### sélection simple
-### La clause WHERE
+#### La clause WHERE
 Définit les critères de sélection
 - opérateurs de comparaison : **<, >, >=, <=, =, <>**
 - opérateurs logiques : **AND, OR, NOT, XOR**
@@ -256,8 +254,7 @@ Définit les critères de sélection
   - '**%**' remplace 0 à n caractères
 
 ---
-###### sélection simple
-### Exemple complet
+#### Exemple complet
 ```sql
 SELECT nom FROM cinema
 WHERE ville = 'Toulouse' OR ville = 'Paris'
@@ -270,6 +267,8 @@ WHERE ville IN ('Toulouse', 'Paris')
 
 ---
 ### Les jointures
+
+---
 #### avec la clause WHERE
 Jointure interne uniquement
 ```sql
@@ -279,7 +278,6 @@ WHERE cinema.ville = ville.nom
 ```
 
 ---
-### Les jointures
 #### avec l'opérateur JOIN
 ```sql
 SELECT cinema.nom, ville.nom, ville.nb_habitants
@@ -287,7 +285,6 @@ FROM cinema [INNER|LEFT|RIGHT|FULL] JOIN ville
 ON cinema.ville = ville.nom
 ```
 ---
-### Les jointures
 #### avec l'opérateur JOIN
 - **INNER JOIN** : jointure interne (par défaut)
 - **LEFT JOIN** : jointure externe en gardant les n-uplets de la relation de gauche
@@ -295,7 +292,6 @@ ON cinema.ville = ville.nom
 - **OUTER JOIN** : jointure externe en gardant les n-uplets des 2 relations
 
 ---
-### Les jointures
 #### avec l'opérateur JOIN
 ```sql[1-3|]
 SELECT ville.nom, cinema.nom
@@ -325,7 +321,6 @@ WHERE ville.nom = 'Trou paumé'
 |**EVERY, ANY, SOME**|Booléen vrai si tout/un vrai|
 
 ---
-### Les fonctions de groupe
 #### Count
 ```sql
 SELECT COUNT(*) FROM cinema
@@ -344,7 +339,7 @@ SELECT COUNT(DISTINCT nom) FROM cinema
 <!-- .element: class="fragment" -->
 
 ---
-### La clause GROUP BY
+#### La clause GROUP BY
 - subdivise la table en groupes
 - une seule ligne représente l'ensemble des n-uplets regroupés
 ```sql
@@ -360,7 +355,7 @@ GROUP BY departement
 ```
 
 ---
-### La clause HAVING
+#### La clause HAVING
 sélection de groupes définis par la clause `GROUP BY`
 ```sql
 SELECT ville, COUNT(*) FROM cinema
@@ -402,7 +397,7 @@ GROUP BY ville
 ```
 
 ---
-### Sous-requêtes vs jointures
+#### Sous-requêtes vs jointures
 Exemple précédent équivalent à :
 ```sql
 SELECT cinema.ville, COUNT(*)
@@ -414,7 +409,7 @@ GROUP BY ville
 - inconvénient : performances
 
 ---
-### Sous-requêtes synchronisées
+#### Sous-requêtes synchronisées
 ```sql
 SELECT DISTINCT nom FROM cinema AS C1
 WHERE nom = (
@@ -430,7 +425,6 @@ Référence à une colonne de la requête principale
 &rarr; réévaluation de la sous-requête pour chaque n-uplet
 
 ---
-### Sous-requêtes
 #### CLAUSE EXISTS
 ```sql
 SELECT DISTINCT nom FROM cinema AS C1
@@ -443,11 +437,10 @@ WHERE EXISTS (
 Vraie si la sous-requête renvoie au moins un n-uplet
 
 ---
-## Opérateurs ensemblistes
+### Opérateurs ensemblistes
 
 ---
-###### Opérateurs ensemblistes
-### Union
+#### Union
 ```sql
 SELECT nom FROM cinema WHERE ville = 'Paris'
 UNION
@@ -460,8 +453,7 @@ WHERE ville = 'Paris' OR ville = 'Toulouse'
 ```
 
 ---
-###### Opérateurs ensemblistes
-### Intersection
+#### Intersection
 ```sql
 SELECT nom FROM cinema WHERE ville = 'Paris'
 INTERSECT
@@ -472,8 +464,7 @@ SELECT nom FROM cinema WHERE ville = 'Toulouse'
 Remarque : le choix des attributs est fondamental
 
 ---
-###### Opérateurs ensemblistes
-### Différence
+#### Différence
 ```sql
 SELECT nom FROM cinema WHERE ville = 'Toulouse'
 EXCEPT
@@ -484,8 +475,7 @@ SELECT nom FROM cinema WHERE ville = 'Paris'
 ```
 
 ---
-###### Opérateurs ensemblistes
-### Division
+#### Division
 Pas d'opérateur spécifique en SQL. Deux solutions :
 - avec la fonction d'agrégation COUNT
 - avec la clause EXISTS
