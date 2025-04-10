@@ -12,8 +12,16 @@ function toggleMenu(e) {
   
   const className = "active"
   const { classList } = document.querySelector('.slide-menu')
-  const method = classList.contains(className) ? "remove" : "add"
-  classList[method](className)
+  const isActive = classList.contains(className)
+  const button = document.querySelector(".slide-menu-button")
+
+  if (isActive) {
+    classList.remove(className)
+    button.textContent = "☰"
+  } else {
+    classList.add(className)
+    button.textContent = "✖"
+  }
 }
 
 function highlightCurrentSlide(e = { indexh : 0, indexv : 0 }) {
@@ -26,33 +34,44 @@ function highlightCurrentSlide(e = { indexh : 0, indexv : 0 }) {
 }
 
 function createMenu() {
-  const reveal = document.querySelector('.reveal')
-  const parent = reveal.parentElement
-  const wrapper = create('div', { class: 'slide-menu' })
-  parent.insertBefore(wrapper, reveal)
+  const container = create('div', { class: 'slide-menu' })
+  document.body.appendChild(container)
     
   const nav = create('nav')
-  wrapper.appendChild(nav)
+  container.appendChild(nav)
 
-  const ol = create('ol')
-  nav.appendChild(ol)
+  let slideCount = 0
+  let currentType = 0
+  let parent
 
   function generateItem(section, i, h, v) {
     let href = '#/' + h;
     if (v) href += '/' + v;
     
-    const titleNode = section.querySelector('h1, h2, h3, h4, h5, h6', )
+    const titleNode = section.querySelector('h1, h2, h3, h4, h5, h6')
     const title = titleNode ? titleNode.textContent : 'Slide ' + (i + 1)
-    const titleType = titleNode.tagName.charAt(1)
+    const titleType = titleNode ? Number(titleNode.tagName.charAt(1)) : currentType
 
-    let item = create('li');
-    let link = create('a', { href }, title)
-    link.style.paddingLeft = (titleType * 10) + "px"
+    const li = create('li');
+    const link = create('a', { href }, title)
+
+    if (!parent) {
+      parent = create("ul")
+      nav.appendChild(parent)
+    } else if (titleType > currentType) {
+      const ol = create("ol")
+      parent.appendChild(ol)
+      ol.appendChild(li)
+      parent = ol
+    } else if (titleType < currentType && parent !== nav.firstElementChild) {
+      parent = parent.parentNode.parentNode
+    }
+
+    currentType = titleType
     
-    item.appendChild(link)
-    ol.appendChild(item)
-
-    return item;
+    li.appendChild(link)
+    parent.appendChild(li)
+    slideCount++
   }
 
   function createMenuItems() {
@@ -60,24 +79,16 @@ function createMenu() {
       setTimeout(createMenuItems, 100)
       return
     }
-                
-    let slideCount = 0
-
+    
     document.querySelectorAll('.slides > section').forEach((section, h) => {
 
       let subsections = section.querySelectorAll('section')
 
       if (subsections.length > 0) {
         subsections.forEach((subsection, v) => {
-          let item = generateItem(subsection, slideCount, h, v)
-          if (item) ol.appendChild(item)
-          slideCount++
+          generateItem(subsection, slideCount, h, v)
         })
-      } else {
-        let item = generateItem(section, slideCount, h)
-        ol.appendChild(item);
-        slideCount++;
-      }
+      } else generateItem(section, slideCount, h)
     })
     highlightCurrentSlide()
   }
