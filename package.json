@@ -2,6 +2,7 @@
   "name": "reveal.js-tree-menu",
   "version": "0.0.1",
   "description": "A slideout tree menu for navigating reveal.js presentations",
+  "main":"index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },

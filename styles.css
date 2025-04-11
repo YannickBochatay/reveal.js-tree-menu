@@ -22,7 +22,7 @@
 }
 
 #main-reveal-wrapper.menu-active #slide-menu-button {
-  display:none;
+  visibility:hidden;
 }
 
 #slide-menu {

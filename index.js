@@ -1,14 +1,26 @@
 const wrapperId = "main-reveal-wrapper"
 const menuId = "slide-menu"
 const classActive = "menu-active"
+const currentPath = import.meta.url.slice(0, import.meta.url.lastIndexOf('/') + 1)
 
 function create(tagName, attrs, content) {
-  const el = document.createElement(tagName);
+  const el = document.createElement(tagName)
   if (attrs) {
-    for (const n in attrs) el.setAttribute(n, attrs[n])
+    for (const n in attrs) {
+      if (typeof attrs[n] === "function") el[n] = attrs[n]
+      else el.setAttribute(n, attrs[n])
+    }
   }
-  if (content) el.innerHTML = content;
+  if (content) el.innerHTML = content
   return el;
+}
+
+function loadCSS(href) {
+  return new Promise((resolve, reject) => {
+    const head = document.querySelector("head")
+    const res = create("link", { rel : "stylesheet", onload : resolve, onerror : reject, href })
+    head.appendChild(res)
+  })
 }
 
 function highlightCurrentSlide(e = { indexh : 0, indexv : 0 }) {
@@ -21,10 +33,8 @@ function highlightCurrentSlide(e = { indexh : 0, indexv : 0 }) {
 }
 
 function createButton() {
-
   let button = create('button', {
     id: menuId + "-button",
-    class : "",
     "aria-expanded" : "false",
     "aria-controls" : menuId
   }, "☰")
@@ -115,9 +125,10 @@ function createMenu() {
 
 export default {
   id: 'tree-menu',
-  init(reveal){
+  async init(reveal) {
     if (location.search.includes("print-pdf")) return
 
+    await loadCSS(currentPath + "styles.css")
     createMenu()
     createButton()
     reveal.layout()
