@@ -19,7 +19,7 @@
   "bugs": {
     "url": "https://github.com/YannickBochatay/reveal.js-tree-menu/issues"
   },
-  "homepage": "https://yannickbochatay.github.io/reveal.js-tree-menu",
+  "homepage": "https://github.com/YannickBochatay/reveal.js-tree-menu",
   "devDependencies": {
     "reveal.js": "^5.2.1"
   }
