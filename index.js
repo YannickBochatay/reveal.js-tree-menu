@@ -104,6 +104,8 @@ class TreeMenu {
     const li = create('li')
     li.appendChild( create('a', { href }, title) )
 
+    const root = this.#navNode.firstElementChild
+
     if (!this.#currentType) {
       this.#currentParent = create("ul")
       this.#navNode.appendChild(this.#currentParent)
@@ -114,9 +116,11 @@ class TreeMenu {
       ol.appendChild(li)
       this.#currentParent = ol
 
-    } else if (titleType < this.#currentType && this.#currentParent !== this.#navNode.firstElementChild) {
+    } else if (titleType < this.#currentType && this.#currentParent) {
       for (let i=0; i<this.#currentType-titleType;i++) {
-        this.#currentParent = this.#currentParent.parentNode
+        if (root.contains(this.#currentParent.parentNode)) {
+          this.#currentParent = this.#currentParent.parentNode
+        }
       }
     }
     
