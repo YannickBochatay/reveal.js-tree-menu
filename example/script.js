@@ -5,4 +5,11 @@ import TreeMenu from 'reveal.js-tree-menu/index.js'
 let deck = new Reveal({
   plugins: [Markdown, TreeMenu]
 });
-deck.initialize();
+await deck.initialize();
+
+const { treeMenu } = deck.getPlugin("tree-menu")
+
+for (const n in treeMenu) {
+  console.log(n)
+}
+treeMenu.button.style.color = "red"

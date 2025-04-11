@@ -1,8 +1,3 @@
-const wrapperId = "main-reveal-wrapper"
-const menuId = "slide-menu"
-const classActive = "menu-active"
-const currentPath = import.meta.url.slice(0, import.meta.url.lastIndexOf('/') + 1)
-
 function create(tagName, attrs, content) {
   const el = document.createElement(tagName)
   if (attrs) {
@@ -23,118 +18,144 @@ function loadCSS(href) {
   })
 }
 
-function highlightCurrentSlide(e = { indexh : 0, indexv : 0 }) {
-  document.querySelectorAll(`#${menuId} li > a`).forEach(item => {
-    const url = new URL(item.href)
-    const currentHash = e ? `#/${e.indexh}${e.indexv ? '/' + e.indexv : ''}` : location.hash
-    const method = (url.hash === currentHash) ? "add" : "remove"
-    item.classList[method](classActive)
-  })
-}
+class TreeMenu {
 
-function createButton() {
-  let button = create('button', {
-    id: menuId + "-button",
-    "aria-expanded" : "false",
-    "aria-controls" : menuId
-  }, "☰")
+  #wrapperId = "main-reveal-wrapper"
+  #menuId = "slide-menu"
+  #classActive = "menu-active"
+
+  #wrapperNode = null
+  #navNode = null
+  #buttonNode = null
+
+  #slideCount = 0
+  #currentType = null
+  #currentParent = null
+
+  get menuNode() { return this.#navNode }
+
+  get buttonNode() { return this.#buttonNode }
+
+  loadCSS() {
+    const currentPath = import.meta.url.slice(0, import.meta.url.lastIndexOf('/') + 1)
+    return loadCSS(currentPath + "styles.css")
+  }
   
-  document.getElementById(wrapperId).appendChild(button)
+  create(reveal) {
+    this.#createLayout()
+    this.#createMenuItems()
+    this.#createButton()
+    this.#closeOnClickDocument()
 
-  button.addEventListener("click", () => {
-    document.getElementById(wrapperId).classList.add(classActive)
-    button.setAttribute("aria-expanded", "true")
-  })
-}
+    reveal.layout()
+    reveal.addEventListener('slidechanged', this.#highlightCurrent.bind(this))
+    this.#navNode.addEventListener("transition-end", reveal.layout)
+  }
 
-function createMenu() {
-  const container = create("div", { id : wrapperId})
-  const reveal = document.querySelector(".reveal")
-  const parentNode = reveal.parentNode
-  const nav = create('nav', { id : menuId })
+  open() {
+    this.#wrapperNode.classList.add(this.#classActive)
+    this.#buttonNode.setAttribute("aria-expanded", "true")
+  }
 
-  container.appendChild(nav)
-  container.appendChild(reveal)
-  parentNode.appendChild(container)  
+  close() {
+    this.#wrapperNode.classList.remove(this.#classActive)
+    this.#buttonNode.setAttribute("aria-expanded", "false")
+  }
 
-  let slideCount = 0
-  let currentType
-  let parent
+  #highlightCurrent(e = { indexh : 0, indexv : 0 }) {
+    this.#navNode.querySelectorAll("li > a").forEach(item => {
+      const url = new URL(item.href)
+      const currentHash = e ? `#/${e.indexh}${e.indexv ? '/' + e.indexv : ''}` : location.hash
+      const method = (url.hash === currentHash) ? "add" : "remove"
+      item.classList[method]("active")
+    })
+  }
 
-  function createItem(section, i, h, v) {
+  #createButton() {
+    let button = create('button', {
+      id: this.#menuId + "-button",
+      "aria-expanded" : "false",
+      "aria-controls" : this.#menuId
+    }, "☰")
+    
+    this.#wrapperNode.appendChild(button)
+    button.addEventListener("click", this.open.bind(this))
+    this.#buttonNode = button
+  }
+
+  #closeOnClickDocument() {
+    document.addEventListener("click", e => {
+      if (
+        !this.#navNode.contains(e.target) &&
+        !e.target.matches("#" + this.#menuId + "-button") &&
+        !document.querySelector("aside.controls").contains(e.target)
+      ) this.close()
+    })
+  }
+
+  #createItem(section, h, v) {
     let href = '#/' + h;
     if (v) href += '/' + v;
     
     const titleNode = section.querySelector('h1, h2, h3, h4, h5, h6')
-    const title = titleNode ? titleNode.textContent : 'Slide ' + (i + 1)
-    const titleType = titleNode ? Number(titleNode.tagName.charAt(1)) : currentType
+    const title = titleNode ? titleNode.textContent : 'Slide ' + (this.#slideCount + 1)
+    const titleType = titleNode ? Number(titleNode.tagName.charAt(1)) : this.#currentType
 
     const li = create('li')
     li.appendChild( create('a', { href }, title) )
 
-    if (!currentType) {
-      parent = create("ul")
-      nav.appendChild(parent)
-    } else if (titleType > currentType) {
+    if (!this.#currentType) {
+      this.#currentParent = create("ul")
+      this.#navNode.appendChild(this.#currentParent)
+
+    } else if (titleType > this.#currentType) {
       const ol = create("ol")
-      parent.appendChild(ol)
+      this.#currentParent.appendChild(ol)
       ol.appendChild(li)
-      parent = ol
-    } else if (titleType < currentType && parent !== nav.firstElementChild) {
-      for (let i=0; i<currentType-titleType;i++) {
-        parent = parent.parentNode
+      this.#currentParent = ol
+
+    } else if (titleType < this.#currentType && this.#currentParent !== this.#navNode.firstElementChild) {
+      for (let i=0; i<this.#currentType-titleType;i++) {
+        this.#currentParent = this.#currentParent.parentNode
       }
     }
     
-    parent.appendChild(li)
-    currentType = titleType
-    slideCount++
+    this.#currentParent.appendChild(li)
+    this.#currentType = titleType
+    this.#slideCount++
   }
 
-  function createMenuItems() {
-    if (document.querySelector('section[data-markdown]:not([data-markdown-parsed])')) {
-      setTimeout(createMenuItems, 100)
-      return
-    }
-    
+  #createMenuItems() {
     document.querySelectorAll('.slides > section').forEach((section, h) => {
       let subsections = section.querySelectorAll('section')
 
       if (subsections.length > 0) {
-        subsections.forEach((subsection, v) => {
-          createItem(subsection, slideCount, h, v)
-        })
-      } else createItem(section, slideCount, h)
+        subsections.forEach((subsection, v) => this.#createItem(subsection, h, v))
+      } else this.#createItem(section, h)
     })
-    highlightCurrentSlide()
+    this.#highlightCurrent()
   }
 
-  createMenuItems()
-
-  document.addEventListener("click", e => {
-    if (
-      !nav.contains(e.target) &&
-      !e.target.matches("#" + menuId + "-button") &&
-      !document.querySelector("aside.controls").contains(e.target)
-    ) {
-      document.getElementById(wrapperId).classList.remove(classActive)
-      document.getElementById(menuId + '-button').setAttribute("aria-expanded", "true")
-    }
-  })
+  #createLayout() {
+    this.#wrapperNode = create("div", { id : this.#wrapperId})
+    const reveal = document.querySelector(".reveal")
+    const parentNode = reveal.parentNode
+    
+    this.#navNode = create('nav', { id : this.#menuId })
+    this.#wrapperNode.appendChild(this.#navNode)
+    this.#wrapperNode.appendChild(reveal)
+    parentNode.appendChild(this.#wrapperNode)  
+  }
 }
+
+const treeMenu = new TreeMenu()
 
 export default {
   id: 'tree-menu',
   async init(reveal) {
-    if (location.search.includes("print-pdf")) return
-
-    await loadCSS(currentPath + "styles.css")
-    createMenu()
-    createButton()
-    reveal.layout()
-    reveal.addEventListener('slidechanged', highlightCurrentSlide)
-
-    const nav = document.getElementById(menuId)
-    nav.addEventListener("transition-end", reveal.layout)
-  }
+    if (location.search.includes("print-pdf")) return    
+    await treeMenu.loadCSS()
+    treeMenu.create(reveal)
+  },
+  treeMenu
 }
