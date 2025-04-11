@@ -3,19 +3,18 @@
   "version": "0.0.1",
   "description": "A slideout tree menu for navigating reveal.js presentations",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "gulp"
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/denehyg/reveal.js-menu.git"
+    "url": "git+https://github.com/YannickBochatay/reveal.js-tree-menu"
   },
   "keywords": [
     "reveal",
     "menu"
   ],
-  "authors": ["Greg Denehy", "Yannick Bochatay"],
-  "license": "MIT, Copyright (C) 2020 Greg Denehy",
+  "authors": ["Yannick Bochatay", "Greg Denehy"],
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/YannickBochatay/reveal.js-tree-menu/issues"
   },
