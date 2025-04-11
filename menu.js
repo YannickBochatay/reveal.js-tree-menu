@@ -1,3 +1,7 @@
+const wrapperId = "main-reveal-wrapper"
+const menuId = "slide-menu"
+const classActive = "menu-active"
+
 function create(tagName, attrs, content) {
   const el = document.createElement(tagName);
   if (attrs) {
@@ -8,36 +12,46 @@ function create(tagName, attrs, content) {
 }
 
 function highlightCurrentSlide(e = { indexh : 0, indexv : 0 }) {
-  document.querySelectorAll('.slide-menu nav li > a').forEach(item => {
+  document.querySelectorAll(`#${menuId} li > a`).forEach(item => {
     const url = new URL(item.href)
     const currentHash = e ? `#/${e.indexh}${e.indexv ? '/' + e.indexv : ''}` : location.hash
     const method = (url.hash === currentHash) ? "add" : "remove"
-    item.classList[method]('active')
+    item.classList[method](classActive)
   })
 }
 
-function createContainer() {
-  const container = create('div', { class: 'slide-menu' })
-  document.body.appendChild(container)
-}
-
 function createButton() {
-  let link = create('a', { href: '#', class: 'slide-menu-button' }, "☰")
-  let container = document.querySelector('.slide-menu')
-  container.appendChild(link)
-  link.addEventListener("click", () => container.classList.add("active"))
+
+  let button = create('button', {
+    id: menuId + "-button",
+    class : "",
+    "aria-expanded" : "false",
+    "aria-controls" : menuId
+  }, "☰")
+  
+  document.getElementById(wrapperId).appendChild(button)
+
+  button.addEventListener("click", () => {
+    document.getElementById(wrapperId).classList.add(classActive)
+    button.setAttribute("aria-expanded", "true")
+  })
 }
 
 function createMenu() {
-      
-  const nav = create('nav')
-  document.querySelector('.slide-menu').appendChild(nav)
+  const container = create("div", { id : wrapperId})
+  const reveal = document.querySelector(".reveal")
+  const parentNode = reveal.parentNode
+  const nav = create('nav', { id : menuId })
+
+  container.appendChild(nav)
+  container.appendChild(reveal)
+  parentNode.appendChild(container)  
 
   let slideCount = 0
   let currentType
   let parent
 
-  function generateItem(section, i, h, v) {
+  function createItem(section, i, h, v) {
     let href = '#/' + h;
     if (v) href += '/' + v;
     
@@ -78,9 +92,9 @@ function createMenu() {
 
       if (subsections.length > 0) {
         subsections.forEach((subsection, v) => {
-          generateItem(subsection, slideCount, h, v)
+          createItem(subsection, slideCount, h, v)
         })
-      } else generateItem(section, slideCount, h)
+      } else createItem(section, slideCount, h)
     })
     highlightCurrentSlide()
   }
@@ -88,18 +102,28 @@ function createMenu() {
   createMenuItems()
 
   document.addEventListener("click", e => {
-    if (!nav.contains(e.target) && !e.target.matches('.slide-menu-button')) {
-      document.querySelector(".slide-menu").classList.remove("active")
+    if (
+      !nav.contains(e.target) &&
+      !e.target.matches("#" + menuId + "-button") &&
+      !document.querySelector("aside.controls").contains(e.target)
+    ) {
+      document.getElementById(wrapperId).classList.remove(classActive)
+      document.getElementById(menuId + '-button').setAttribute("aria-expanded", "true")
     }
   })
 }
 
 export default {
-  id: 'menu',
+  id: 'tree-menu',
   init(reveal){
-    createContainer()
-    createButton()
+    if (location.search.includes("print-pdf")) return
+
     createMenu()
+    createButton()
+    reveal.layout()
     reveal.addEventListener('slidechanged', highlightCurrentSlide)
+
+    const nav = document.getElementById(menuId)
+    nav.addEventListener("transition-end", reveal.layout)
   }
 }
